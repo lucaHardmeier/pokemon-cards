@@ -1,23 +1,33 @@
-const PokemonsContainer = ({ pokemones, setPokemonsData }) => {
+import { useEffect, useState } from "react"
+import PokeBrowser from "./PokeBrowser.jsx"
+import PokemonCard from "./PokemonCard.jsx"
 
-    const catchedPokemon = (number) => {
-        setPokemonsData(pokemones.filter((pokemon) => number !== pokemon.number))
+
+const PokemonsContainer = () => {
+
+    const [pokemons, setPokemons] = useState([])
+    const [search, setSearch] = useState("")
+
+    const pokeRequest = async () => {
+        const response = await fetch("https://pokeapi.co/api/v2/pokemon?limit=20&offset=0")
+        const data = await response.json()
+        setPokemons(data.results)
     }
 
+    useEffect(() => {
+        pokeRequest()
+    }, [])
+
     return (
-        <div className="container mt-3 row">
-            {pokemones.map((pokemon) => {
-                return (
-                    <div className="card" key={pokemon.number} style={{ width: "18rem" }}>
-                        <img src={pokemon.img} className="card-img-top" alt="..." />
-                        <div className="card-body">
-                            <h5 className="card-title">{("00" + pokemon.number).slice(-3)} - {pokemon.name}</h5>
-                            <button className="btn btn-primary" onClick={() => catchedPokemon(pokemon.number)}>Atrapar</button>
-                        </div>
-                    </div>
-                )
-            })}
-        </div>
+        <>
+            <PokeBrowser setSearch={setSearch} />
+            <div className="d-flex flex-wrap">
+                {pokemons
+                    .filter((pokemon) => pokemon.name.includes(search))
+                    .map((pokemon) => <PokemonCard key={pokemon.name} pokeUrl={pokemon.url} />)
+                }
+            </div>
+        </>
     )
 }
 
